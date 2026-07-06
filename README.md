@@ -28,6 +28,8 @@ Feel free to modify, improve, or take inspiration from this app for your own pro
 
 ### 🚀 Kısaca bazı özellikler / Quick Features:
 
+* 🖱️ **Sürükle ve Taşı (Drag and Move):** Kapsülü farenizle (mouse) basılı tutarak ekranın istediğiniz yerine rahatça taşıyabilirsiniz. / Click and hold the capsule with your mouse to drag and position it anywhere on your screen.
+
 * 🎙️ **Aç/Kapa için Sadece Tıkla (Just Click to Toggle):** Mikrofonu tek bir tıklamayla aktif veya sessiz hale getirebilirsiniz. / Easily mute or unmute the microphone with a single click.
 
 <img width="319" height="171" alt="Mik durumu" src="https://github.com/user-attachments/assets/330a2126-d772-45c9-99db-7033ce03abb6" />
@@ -53,7 +55,7 @@ Feel free to modify, improve, or take inspiration from this app for your own pro
 
 <p align="center">
   🔗 <b>Alternatif İndirme Linki / Alternative Download Link (MediaFire):</b> 
-  <a href="BURAYA_YÜKLEDİĞİN_SİTENİN_LİNKİNİ_YAPIŞTIR">İndir / Download</a>
+  <a href="https://drive.google.com/file/d/1Sxemtt7pdiDz81_v4-8ay8jZFPVlqE9q/view?usp=sharing">İndir / Download</a>
 </p>
   </a>
 </p>
