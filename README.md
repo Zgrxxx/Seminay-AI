@@ -10,8 +10,8 @@ Oldukça sade ve kolay kullanılmasına gayret ettim. Şu adresten "https://aist
 Dediğim gibi oldukça sade yapmaya çalıştım. Ekran yakalama, Kamera vs. gibi özellikler çıkarılmıştır. Sadece sesli yanıt, sohbet içindir.
 Maalesef Google canlı bağlantılarda (WebSocket) web araması için karmaşık OAuth 2.0 yetkilendirmesi dayattığından, "Google Arama" fonksiyonunu da çıkarmak zorunda kaldım. 
 Bu sorunu çok uğraşmama rağmen çözemedim maalesef, o sebeple uygulamada kullandığım (Gemini 2.5 Flash Native Audio) model sadece 2023 yılına kadar günceldir, o tarihten sonrası yok... Eğer bu sorunu çözen veya çözümü bilen lütfen bana da söylerse sevinirim.
-Ben kodlama bile biri değilm, kodları tamamen yapay zekaya yaptırdım, o sebeple kusurlarımı mazur görün lütfen. "Gemini live" yeni gelişen bir teknoloji bildiğim kadarı ile ve bizde kodlarda "api_version": "v1alpha" kullanıyoruz.
-Maalesef diğer modelleri çalıştıramadım. Bu sebeplerden ve token limitleri veya sunucu tarafındaki sorunlardan dolayı kesinti olabilir. Ben kendim test için 2 saate yakın kesintisiz konuştum. Eğer kesilirse en azından tekrar başlatmayı deneyiniz, muhtemelen düzelecektir.
+Ben kodlama bilen biri değilim, kodları tamamen yapay zekaya yaptırdım, o sebeple kusurlarımı mazur görün lütfen. "Gemini live" yeni gelişen bir teknoloji bildiğim kadarı ile ve bizde kodlarda "api_version": "v1alpha" kullanıyoruz.
+Maalesef diğer modelleri çalıştıramadım. Bu sebeplerden ve token limitleri veya sunucu tarafındaki sorunlardan dolayı kesinti olabilir. Ben kendim test için 2 saate yakın kesintisiz konuşmuştum. Eğer kesilirse en azından uygulamayı tekrar başlatmayı deneyiniz, muhtemelen düzelecektir.
 Dileyen dilediği gibi uygulamayı değiştirebilir, geliştirebilir veya ilham alıp kendi uygulamasına kullanabilir. Herkese sevgiler...
 
 -------
