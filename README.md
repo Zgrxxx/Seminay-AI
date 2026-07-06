@@ -41,3 +41,19 @@ Feel free to modify, improve, or take inspiration from this app for your own pro
 <img width="318" height="429" alt="Ayarlar" src="https://github.com/user-attachments/assets/59778fdf-72a3-45f4-97a4-ffbce5bca658" />
 
 * ⌨️ **ESC ile Hızlı Gizleme (Quick Hide with ESC):** Ekranda yer kaplamasını istemediğinizde ESC tuşuna basarak uygulamayı anında gizleyebilirsiniz. / Instantly hide the app by pressing the ESC key whenever you need it out of sight.
+
+
+
+<p align="center">
+  <!-- GitHub Release Butonu -->
+  <a href="https://github.com/Zgrxxx/Seminay-AI/releases/latest">
+    <img src="https://img.shields.io/badge/Download-EXE_v1.0.0-green?style=for-the-badge&logo=windows" alt="Download EXE">
+  </a>
+</p>
+
+<p align="center">
+  🔗 <b>Alternatif İndirme Linki / Alternative Download Link (MediaFire):</b> 
+  <a href="BURAYA_YÜKLEDİĞİN_SİTENİN_LİNKİNİ_YAPIŞTIR">İndir / Download</a>
+</p>
+  </a>
+</p>
