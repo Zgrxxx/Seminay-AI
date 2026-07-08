@@ -46,12 +46,26 @@ Feel free to modify, improve, or take inspiration from this app for your own pro
 
 
 
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=vDMtb-2wz4A">
+    <img src="https://img.youtube.com/vi/vDMtb-2wz4A/hqdefault.jpg" alt="Seminay AI - Gemini Live Masaüstü Uygulaması Demo" width="240" height="180" style="border-radius: 6px; border: 1px solid #ddd; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+  <br>
+  <strong>🎬 Seminay AI: Gemini Live Desktop Demo</strong>
+  </a>
+</p>
+
+
+
 <p align="center">
   <!-- GitHub Release Butonu -->
   <a href="https://github.com/Zgrxxx/Seminay-AI/releases/latest">
     <img src="https://img.shields.io/badge/Download-EXE_v1.0.0-green?style=for-the-badge&logo=windows" alt="Download EXE">
   </a>
 </p>
+
+
+
 
 <p align="center">
   🔗 <b>Alternatif İndirme Linki / Alternative Download Link (MediaFire):</b> 
