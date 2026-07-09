@@ -60,7 +60,7 @@ Feel free to modify, improve, or take inspiration from this app for your own pro
 <p align="center">
   <!-- GitHub Release Butonu -->
   <a href="https://github.com/Zgrxxx/Seminay-AI/releases/latest">
-    <img src="https://img.shields.io/badge/Download-EXE_v1.0.0-green?style=for-the-badge&logo=windows" alt="Download EXE">
+    <img src="[https://img.shields.io/badge/Download-EXE_v1.0.0-green?style=for-the-badge&logo=windows](https://drive.google.com/file/d/1Baq60kXJmbsrBYB0_nJPns9eyuaoSrw_/view?usp=sharing)" alt="Download EXE">
   </a>
 </p>
 
@@ -68,7 +68,7 @@ Feel free to modify, improve, or take inspiration from this app for your own pro
 
 
 <p align="center">
-  🔗 <b>Alternatif İndirme Linki / Alternative Download Link (MediaFire):</b> 
+  🔗 <b>Alternatif İndirme Linki / Alternative Download Link (Google Drive):</b> 
   <a href="https://drive.google.com/file/d/1Sxemtt7pdiDz81_v4-8ay8jZFPVlqE9q/view?usp=sharing">İndir / Download</a>
 </p>
   </a>
