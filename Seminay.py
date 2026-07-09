@@ -340,7 +340,6 @@ class SettingsWindow(QWidget):
             
             is_tr = (self.current_lang == "TR")
 
-            # KADIN SESLERİ
             self.voice_combo.addItem("--- Kadın Sesleri ---" if is_tr else "--- Female Voices ---", None)
             female_voices = [
                 ("Achernar", "Soft, Higher pitch", "Yumuşak, Yüksek perde"),
@@ -360,7 +359,6 @@ class SettingsWindow(QWidget):
             for name, eng, tr in female_voices:
                 self.voice_combo.addItem(f"{name} ({tr if is_tr else eng})", name)
 
-            # ERKEK SESLERİ
             self.voice_combo.addItem("--- Erkek Sesleri ---" if is_tr else "--- Male Voices ---", None)
             male_voices = [
                 ("Achird", "Friendly, Lower middle pitch", "Dost canlısı, Alt orta perde"),
@@ -433,7 +431,7 @@ class SettingsWindow(QWidget):
     def save_settings(self):
         self.settings.setValue("language", self.lang_combo.currentData())
         self.settings.setValue("api_key", self.api_input.text().strip())
-        self.settings.setValue("is_restarting", True) # Otomatik başlatma bayrağı
+        self.settings.setValue("is_restarting", True)
         
         if self.full_mode:
             self.settings.setValue("voice", self.voice_combo.currentData())
@@ -446,7 +444,6 @@ class SettingsWindow(QWidget):
         
         lang = self.lang_combo.currentData()
         
-        # Dil destekli başlık ve içerik metinleri
         if lang == "EN":
             title = "Seminay - Restarting"
             text = "Settings saved."
@@ -474,7 +471,6 @@ class SettingsWindow(QWidget):
         
         msg.exec()
         
-        # Yeniden başlatma ve çıkış
         QProcess.startDetached(sys.executable, sys.argv)
         QApplication.quit()
 
@@ -597,7 +593,6 @@ class SeminayKapsul(QWidget):
     def show_disconnect_warning(self):
         self.on_state_changed("IDLE") 
         
-        # Dil ayarını kontrol et
         lang = self.settings.value("language", "TR")
         
         if lang == "EN":
