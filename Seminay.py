@@ -5,7 +5,7 @@ import math
 import random
 import time
 import pyaudio
-import struct
+import struct 
 
 from google import genai
 from google.genai import types
@@ -27,7 +27,6 @@ MODEL = "models/gemini-2.5-flash-native-audio-latest"
 
 class GeminiWorker(QThread):
     state_changed = pyqtSignal(str)  # SPEAKING, THINKING, IDLE
-    connection_dropped = pyqtSignal()
 
     def __init__(self):
         super().__init__()
@@ -48,9 +47,7 @@ class GeminiWorker(QThread):
         try:
             self.loop.run_until_complete(self.main_loop())
         except Exception:
-            is_restarting = QSettings("SeminayAI", "SeminayAsistan").value("is_restarting", False)
-            if self.running and not is_restarting:
-                self.connection_dropped.emit()
+            sys.exit(1)
         finally:
             self.pya_in.terminate()
             self.pya_out.terminate()
@@ -102,6 +99,7 @@ class GeminiWorker(QThread):
                 await self.session.send(input=msg)
 
     async def listen_audio(self):
+        
         def open_mic_stream():
             mic_info = self.pya_in.get_default_input_device_info()
             return self.pya_in.open(
@@ -340,6 +338,7 @@ class SettingsWindow(QWidget):
             
             is_tr = (self.current_lang == "TR")
 
+
             self.voice_combo.addItem("--- Kadın Sesleri ---" if is_tr else "--- Female Voices ---", None)
             female_voices = [
                 ("Achernar", "Soft, Higher pitch", "Yumuşak, Yüksek perde"),
@@ -429,9 +428,9 @@ class SettingsWindow(QWidget):
         self.move(s.width() - self.width() - 15, s.height() - self.height() - 45)
 
     def save_settings(self):
+
         self.settings.setValue("language", self.lang_combo.currentData())
         self.settings.setValue("api_key", self.api_input.text().strip())
-        self.settings.setValue("is_restarting", True)
         
         if self.full_mode:
             self.settings.setValue("voice", self.voice_combo.currentData())
@@ -445,13 +444,13 @@ class SettingsWindow(QWidget):
         lang = self.lang_combo.currentData()
         
         if lang == "EN":
-            title = "Seminay - Restarting"
+            title = "Seminay"
             text = "Settings saved."
-            info = "The application is restarting to apply changes."
+            info = "Please restart the program for the changes to take effect."
         else:
-            title = "Seminay - Yeniden Başlatılıyor"
+            title = "Seminay"
             text = "Ayarlar kaydedildi."
-            info = "Değişikliklerin uygulanması için program yeniden başlatılıyor."
+            info = "Değişikliklerin aktif olması için lütfen programı tekrar başlatın."
         
         msg = QMessageBox(self)
         msg.setWindowTitle(title)
@@ -470,8 +469,6 @@ class SettingsWindow(QWidget):
         """)
         
         msg.exec()
-        
-        QProcess.startDetached(sys.executable, sys.argv)
         QApplication.quit()
 
     def close_settings(self):
@@ -492,7 +489,6 @@ class SeminayKapsul(QWidget):
 
         self.worker = GeminiWorker()
         self.worker.state_changed.connect(self.on_state_changed)
-        self.worker.connection_dropped.connect(self.show_disconnect_warning)
         self.worker.start()
 
         self.chat_input = QLineEdit(self)
@@ -588,38 +584,6 @@ class SeminayKapsul(QWidget):
     def show_kapsul(self):
         self.show()
         self.raise_()
-
-    @pyqtSlot()
-    def show_disconnect_warning(self):
-        self.on_state_changed("IDLE") 
-        
-        lang = self.settings.value("language", "TR")
-        
-        if lang == "EN":
-            title = "Seminay - Connection Lost"
-            text = "Connection to Google servers lost."
-            info = "Please restart the application to continue."
-        else:
-            title = "Seminay - Bağlantı Koptu"
-            text = "Google sunucularıyla iletişim kesildi."
-            info = "Sohbete devam edebilmek için lütfen uygulamayı yeniden başlatın."
-
-        msg = QMessageBox(self)
-        msg.setWindowTitle(title)
-        msg.setText(text)
-        msg.setInformativeText(info)
-        msg.setIcon(QMessageBox.Icon.Warning)
-        msg.setStandardButtons(QMessageBox.StandardButton.Ok)
-        
-        msg.setStyleSheet("""
-            QMessageBox { background-color: #121212; }
-            QLabel { color: white; }
-            QPushButton { 
-                background-color: #ffffff; color: black; 
-                border-radius: 5px; padding: 5px 15px; font-weight: bold;
-            }
-        """)
-        msg.exec()
 
     def reposition_to_corner(self):
         s = QApplication.primaryScreen().availableGeometry()
