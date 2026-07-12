@@ -13,7 +13,7 @@ from google.genai import types
 from PyQt6.QtWidgets import (QApplication, QWidget, QSystemTrayIcon, QMenu, 
                              QLineEdit, QVBoxLayout, QHBoxLayout, QLabel, 
                              QComboBox, QTextEdit, QPushButton, QMessageBox) 
-from PyQt6.QtCore import Qt, QTimer, QThread, pyqtSignal, pyqtSlot, QSettings
+from PyQt6.QtCore import Qt, QTimer, QThread, pyqtSignal, pyqtSlot, QSettings, QPropertyAnimation
 from PyQt6.QtGui import QPainter, QColor, QIcon
 from PyQt6.QtCore import QProcess
 
@@ -37,6 +37,7 @@ class GeminiWorker(QThread):
         self.mic_muted = False
         self.loop = None
         self.current_state = "IDLE"
+        self.current_handle = None
 
     def run(self):
         self.pya_in = pyaudio.PyAudio()   
@@ -66,40 +67,63 @@ class GeminiWorker(QThread):
                 prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=voice_name)
             )
 
-        config = types.LiveConnectConfig(
-            system_instruction=system_instruction if system_instruction else None,
-            response_modalities=["AUDIO"],
-            speech_config=types.SpeechConfig(voice_config=voice_config) if voice_config else None,
-            enable_affective_dialog=True,
-            media_resolution="MEDIA_RESOLUTION_MEDIUM",
-            context_window_compression=types.ContextWindowCompressionConfig(
-                trigger_tokens=104857,   
-                sliding_window=types.SlidingWindow(target_tokens=52428),
-            ),
-        )
+        while self.running:
+            config = types.LiveConnectConfig(
+                system_instruction=system_instruction if system_instruction else None,
+                response_modalities=["AUDIO"],
+                speech_config=types.SpeechConfig(voice_config=voice_config) if voice_config else None,
+                enable_affective_dialog=True,
+                media_resolution="MEDIA_RESOLUTION_MEDIUM",
+                context_window_compression=types.ContextWindowCompressionConfig(
+                    trigger_tokens=104857,   
+                    sliding_window=types.SlidingWindow(target_tokens=52428),
+                ),
 
-        async with client.aio.live.connect(model=MODEL, config=config) as session:
-            self.session = session
-            self.audio_in_queue = asyncio.Queue()
-            self.out_queue = asyncio.Queue(maxsize=50)
+                session_resumption=types.SessionResumptionConfig(handle=self.current_handle),
+                
 
-            async with asyncio.TaskGroup() as tg:
-                self.send_task = tg.create_task(self.send_realtime())
-                self.mic_task = tg.create_task(self.listen_audio())
-                self.receive_task = tg.create_task(self.receive_audio())
-                self.play_task = tg.create_task(self.play_audio())
+                tools=[
+                    types.Tool(google_search=types.GoogleSearch())
+                ]
+            )
 
-                while self.running:
-                    await asyncio.sleep(0.2)
+            try:
+                async with client.aio.live.connect(model=MODEL, config=config) as session:
+                    self.session = session
+                    self.audio_in_queue = asyncio.Queue()
+                    self.out_queue = asyncio.Queue(maxsize=50)
+
+                    async with asyncio.TaskGroup() as tg:
+                        self.send_task = tg.create_task(self.send_realtime())
+                        self.mic_task = tg.create_task(self.listen_audio())
+                        self.receive_task = tg.create_task(self.receive_audio())
+                        self.play_task = tg.create_task(self.play_audio())
+
+                        while self.running:
+                            await asyncio.sleep(0.5)
+
+                            if self.receive_task.done():
+
+                                raise ConnectionError("Tünel süresi doldu, zombi görevler iptal edilip jetonla tazeleniyor...")
+            except Exception:
+
+                await asyncio.sleep(0.5)
 
     async def send_realtime(self):
         while self.running:
-            msg = await self.out_queue.get()
+            chunk = await self.out_queue.get() 
             if self.session:
-                await self.session.send(input=msg)
+                try:
+                    await self.session.send_realtime_input(
+                        audio=types.Blob(
+                            data=chunk,
+                            mime_type="audio/pcm;rate=16000"
+                        )
+                    )
+                except Exception:
+                    break
 
     async def listen_audio(self):
-        
         def open_mic_stream():
             mic_info = self.pya_in.get_default_input_device_info()
             return self.pya_in.open(
@@ -108,7 +132,6 @@ class GeminiWorker(QThread):
             )
 
         stream = await asyncio.to_thread(open_mic_stream)
-        
         try:
             while self.running:
                 if self.mic_muted:
@@ -130,7 +153,7 @@ class GeminiWorker(QThread):
                             self.current_state = "THINKING"
                             self.state_changed.emit("THINKING")
 
-                await self.out_queue.put({"data": data, "mime_type": "audio/pcm"})
+                await self.out_queue.put(data)
         finally:
             stream.stop_stream()
             stream.close()
@@ -138,16 +161,26 @@ class GeminiWorker(QThread):
     async def receive_audio(self):
         while self.running:
             if self.session:
-                async for response in self.session.receive():
-                    if response.server_content and response.server_content.model_turn:
-                        for part in response.server_content.model_turn.parts:
-                            if part.inline_data and self.running:
-                                self.audio_in_queue.put_nowait(part.inline_data.data)
-                    
-                    if response.server_content and response.server_content.turn_complete:
-                        if self.audio_in_queue.empty() and self.current_state == "THINKING":
-                            self.current_state = "IDLE"
-                            self.state_changed.emit("IDLE")
+                try:
+                    async for response in self.session.receive():
+
+                        if response.session_resumption_update:
+                            update = response.session_resumption_update
+                            if update.resumable and update.new_handle:
+                                self.current_handle = update.new_handle
+
+                        if response.server_content and response.server_content.model_turn:
+                            for part in response.server_content.model_turn.parts:
+                                if part.inline_data and self.running:
+                                    self.audio_in_queue.put_nowait(part.inline_data.data)
+                        
+                        if response.server_content and response.server_content.turn_complete:
+                            if self.audio_in_queue.empty() and self.current_state == "THINKING":
+                                self.current_state = "IDLE"
+                                self.state_changed.emit("IDLE")
+                except Exception:
+                    break
+            await asyncio.sleep(0.1)
 
     async def play_audio(self):
         stream = await asyncio.to_thread(
@@ -173,7 +206,7 @@ class GeminiWorker(QThread):
         if self.loop and self.session:
             self.current_state = "THINKING"
             asyncio.run_coroutine_threadsafe(
-                self.session.send(input=text, end_of_turn=True), self.loop
+                self.session.send_realtime_input(text=text), self.loop
             )
 
     def toggle_mic(self):
@@ -482,6 +515,7 @@ class SeminayKapsul(QWidget):
     def __init__(self):
         super().__init__()
         self.settings = QSettings("SeminayAI", "SeminayAsistan")
+        self._drag_pos = None
         
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -503,13 +537,28 @@ class SeminayKapsul(QWidget):
         self.capsule_body = QWidget(self)
         self.capsule_body.setFixedSize(100, 36)
         self.capsule_body.move(10, 45)
+
         self.capsule_body.setStyleSheet(
-            "background: qlineargradient(x1:0, y1:0, x2:0, y2:1, stop:0 #1a1a1a, stop:1 #000000); "
+            "background: qlineargradient(x1:0, y1:0, x2:0, y2:1, "
+            "stop:0 rgba(26, 26, 26, 210), "   
+            "stop:0.5 rgba(15, 15, 15, 225), " 
+            "stop:1 rgba(5, 5, 5, 240)); "     
+            "border: 1px solid rgba(255, 255, 255, 35); " 
             "border-radius: 18px;"
         )
-
         self.equalizer = EqualizerBar(color="#ffffff", parent=self.capsule_body)
         self.equalizer.move(20, 7)
+
+        from PyQt6.QtWidgets import QGraphicsDropShadowEffect
+        from PyQt6.QtGui import QColor
+        
+        self.golge_efekti = QGraphicsDropShadowEffect(self)
+        self.golge_efekti.setBlurRadius(20)          
+        self.golge_efekti.setXOffset(0)              
+        self.golge_efekti.setYOffset(6)              
+        self.golge_efekti.setColor(QColor(0, 0, 0, 180)) 
+        
+        self.capsule_body.setGraphicsEffect(self.golge_efekti)
 
         self.setup_tray()
 
@@ -518,7 +567,18 @@ class SeminayKapsul(QWidget):
         self.ani_timer.start(120)
 
         self.reposition_to_corner()
+
+        self.setWindowOpacity(0.0)
+        self.opacity_anim = QPropertyAnimation(self, b"windowOpacity")
+        self.opacity_anim.setDuration(1200) 
+        self.opacity_anim.setStartValue(0.0)
+        self.opacity_anim.setEndValue(1.0)
+        
+        from PyQt6.QtCore import QEasingCurve
+        self.opacity_anim.setEasingCurve(QEasingCurve.Type.InOutQuad)
+        
         self.show()
+        self.opacity_anim.start()
 
     def setup_tray(self):
         lang = self.settings.value("language", "TR")
@@ -596,9 +656,26 @@ class SeminayKapsul(QWidget):
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self._drag_pos = event.globalPosition().toPoint()
+            self.capsule_body.setStyleSheet(
+                "background: rgba(0, 0, 0, 150); "
+                "border: 1px solid rgba(255, 255, 255, 35); "
+                "border-radius: 18px;"
+            )
+            event.accept()
+
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.capsule_body.setStyleSheet(
+                "background: qlineargradient(x1:0, y1:0, x2:0, y2:1, "
+                "stop:0 rgba(26, 26, 26, 210), stop:0.5 rgba(15, 15, 15, 225), stop:1 rgba(5, 5, 5, 240)); "
+                "border: 1px solid rgba(255, 255, 255, 35); "
+                "border-radius: 18px;"
+            )
+            self._drag_pos = None
+            event.accept()
 
     def mouseMoveEvent(self, event):
-        if event.buttons() == Qt.MouseButton.LeftButton:
+        if (event.buttons() & Qt.MouseButton.LeftButton) and self._drag_pos is not None:
             diff = event.globalPosition().toPoint() - self._drag_pos
             self.move(self.pos() + diff)
             self._drag_pos = event.globalPosition().toPoint()
