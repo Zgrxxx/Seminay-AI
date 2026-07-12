@@ -6,23 +6,36 @@ Herkese Selamlar
 "Her" filmindeki "Samantha" yapay zekasından etkilenerek kendim için yaptığım arayüzü biraz revize ederek paylaşmak istedim. 
 Oldukça sade ve kolay kullanılmasına gayret ettim. Şu adresten "https://aistudio.google.com" alacağınız bir APİ.Key anahtarını, uygulamanın ilk açılışında istenen yere girin ve kullanmaya başlayın. 
 İsterseniz ayarlardan daha sonra başka key girerek değiştirebilirsiniz.
+
 İster hemen mikrofona konuşarak, istersenizde kapsüle çift tıklayarak açılan metin alanına yazınızı yazarak sohbete başlayabilirisniz. Gemini sadece sesle yanıt verecektir.
-Dediğim gibi oldukça sade yapmaya çalıştım. Ekran yakalama, Kamera vs. gibi özellikler çıkarılmıştır. Sadece sesli yanıt, sohbet içindir.
-Maalesef Google canlı bağlantılarda (WebSocket) web araması için karmaşık OAuth 2.0 yetkilendirmesi dayattığından, "Google Arama" fonksiyonunu da çıkarmak zorunda kaldım. 
-Bu sorunu çok uğraşmama rağmen çözemedim maalesef, o sebeple uygulamada kullandığım (Gemini 2.5 Flash Native Audio) model sadece 2023 yılına kadar günceldir, o tarihten sonrası yok... Eğer bu sorunu çözen veya çözümü bilen lütfen bana da söylerse sevinirim.
+Dediğim gibi oldukça sade yapmaya çalıştım. Ekran yakalama, Kamera vs. gibi özellikler çıkarılmıştır. Sadece sesli yanıt, sohbet içindir. (Lakin istenirse belki gelecekte eklenebilir.)
+
 Ben kodlama bilen biri değilim, kodları tamamen yapay zekaya yaptırdım, o sebeple kusurlarımı mazur görün lütfen. "Gemini live" yeni gelişen bir teknoloji bildiğim kadarı ile ve bizde kodlarda "api_version": "v1alpha" kullanıyoruz.
-Maalesef diğer modelleri çalıştıramadım. Bu sebeplerden ve token limitleri veya sunucu tarafındaki sorunlardan dolayı kesinti olabilir. Ben kendim test için 2 saate yakın kesintisiz konuşmuştum. Eğer kesilirse en azından uygulamayı tekrar başlatmayı deneyiniz, muhtemelen düzelecektir.
-Dileyen dilediği gibi uygulamayı değiştirebilir, geliştirebilir veya ilham alıp kendi uygulamasına kullanabilir. Herkese sevgiler...
+
+Maalesef diğer modelleri çalıştıramadım. Bu sebeplerden ve token limitleri veya sunucu tarafındaki sorunlardan dolayı kesinti olabilir. Eğer kesilirse en azından uygulamayı tekrar başlatmayı deneyiniz, muhtemelen düzelecektir.
+
+Dileyen dilediği gibi uygulamayı değiştirebilir, geliştirebilir veya ilham alıp kendi uygulamasına kullanabilir, sizlerin takdirine kalmış... Herkese sevgiler...
 
 -------
 English translation;
 
-Hello Everyone,
-Inspired by the "Samantha" AI from the movie "Her", I wanted to slightly revise and share the interface I originally built for myself. I tried to keep it as simple and user-friendly as possible. Just grab an API Key from "https://aistudio.google.com", enter it into the prompt when you first launch the app, and you're good to go. You can always change it later with a different key in the settings.
-You can start chatting either by speaking into your microphone right away, or by double-clicking the capsule to open the chat box and typing your message. Gemini will respond with voice only. As I mentioned, I aimed for ultimate simplicity, so features like screen capture or camera access have been removed. It is strictly for voice-based conversations.
-Unfortunately, because Google enforces complex OAuth 2.0 authorization for web searches over live connections (WebSocket), I had to remove the "Google Search" function as well. Despite my best efforts, I couldn't crack this issue. Therefore, the model I used (Gemini 2.5 Flash Native Audio) is only up to date until 2023; it lacks data after that... If anyone knows a workaround or a solution for this, please let me know, I'd appreciate it!
-I am not a coder myself—I had AI write the entire codebase, so please excuse any flaws or shortcomings. As far as I know, "Gemini Live" is a newly developing technology, and we are using "api_version": "v1alpha" in the code. I couldn't get the other models to work. Due to these reasons, token limits, or server-side issues, you might experience occasional disconnections. During my personal tests, I managed to chat continuously for nearly 2 hours. If it disconnects, just try restarting the app; it will most likely fix itself.
-Feel free to modify, improve, or take inspiration from this app for your own projects. Sending love to everyone...
+Greetings Everyone,
+
+I wanted to share the interface I built for myself, inspired by the AI "Samantha" from the movie "Her," after making a few revisions to it. 
+
+I tried to keep it as simple and user-friendly as possible. Just get an API Key from "https://aistudio.google.com", enter it into the prompt when you first launch the app, and you're good to go.
+
+If you wish, you can change it later by entering a different key in the settings.
+
+You can start the conversation either by speaking into the microphone right away or by double-clicking the capsule to type your message in the text field that appears. Gemini will only respond via voice.
+
+As I mentioned, I tried to keep it quite minimal. Features like screen capture, camera, etc., have been removed. It is strictly for voice-based responses and chatting. (However, they might be added in the future if requested.)
+
+I am not someone who knows how to code; I had AI write the code entirely, so please overlook any flaws. As far as I know, "Gemini Live" is an emerging technology, and we are using "api_version": "v1alpha" in the code.
+
+Unfortunately, I couldn't get the other models to work. Due to these reasons, token limits, or server-side issues, there might be occasional interruptions. If it disconnects, try restarting the app at the very least; it will likely fix the issue.
+
+Anyone is welcome to modify, improve, or take inspiration from this app for their own projects however they see fit—it's entirely up to you... Much love to everyone...
 
 -------
 
@@ -83,5 +96,5 @@ Seminay AI v.0.0.1 - Update Notes
 
 <p align="center">
   🔗 <b>Alternatif İndirme Linki / Alternative Download Link (Google Drive):</b> 
-  <a href="https://drive.google.com/file/d/1Baq60kXJmbsrBYB0_nJPns9eyuaoSrw_/view?usp=drive_link">İndir / Download</a>
+  <a href="https://drive.google.com/file/d/1WRsK63WEertSNW-vGsvQnr6oPDecAfGB/view?usp=sharing">İndir / Download</a>
 </p>
