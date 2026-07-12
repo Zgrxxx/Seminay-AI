@@ -59,7 +59,7 @@ Feel free to modify, improve, or take inspiration from this app for your own pro
 
 <p align="center">
   <a href="https://github.com/Zgrxxx/Seminay-AI/releases/latest">
-    <img src="https://img.shields.io/badge/Download-EXE_v1.0.0-green?style=for-the-badge&logo=windows" alt="Download EXE">
+    <img src="https://img.shields.io/badge/Download-EXE_v1.0.1-green?style=for-the-badge&logo=windows" alt="Download EXE">
   </a>
 </p>
 
