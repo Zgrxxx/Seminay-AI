@@ -4,7 +4,7 @@
 Herkese Selamlar
 
 "Her" filmindeki "Samantha" yapay zekasından etkilenerek kendim için yaptığım arayüzü biraz revize ederek paylaşmak istedim. 
-Oldukça sade ve kolay kullanılmasına gayret ettim. Şu adresten "https://aistudio.google.com" alacağınız bir APİ.Key anahtarını, uygulamanın ilk açılışında istenen yere girin ve kullanmaya başlayın. 
+Oldukça sade ve kolay kullanılmasına gayret ettim. Şu adresten "https://aistudio.google.com" alacağınız ücretsiz bir APİ.Key anahtarını, uygulamanın ilk açılışında istenen yere girin ve kullanmaya başlayın. 
 İsterseniz ayarlardan daha sonra başka key girerek değiştirebilirsiniz.
 
 İster hemen mikrofona konuşarak, istersenizde kapsüle çift tıklayarak açılan metin alanına yazınızı yazarak sohbete başlayabilirisniz. Gemini sadece sesle yanıt verecektir.
@@ -23,7 +23,9 @@ Greetings Everyone,
 
 I wanted to share the interface I built for myself, inspired by the AI "Samantha" from the movie "Her," after making a few revisions to it. 
 
-I tried to keep it as simple and user-friendly as possible. Just get an API Key from "https://aistudio.google.com", enter it into the prompt when you first launch the app, and you're good to go.
+I tried to keep it as simple and user-friendly as possible. Just get a free API Key from "https://aistudio.google.com", enter it into the prompt when you first launch the app, and you're good to go.
+
+If you wish, you can change it later by entering a different key in the settings.
 
 If you wish, you can change it later by entering a different key in the settings.
 
