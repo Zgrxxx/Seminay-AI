@@ -44,7 +44,25 @@ Feel free to modify, improve, or take inspiration from this app for your own pro
 
 * ⌨️ **ESC ile Hızlı Gizleme (Quick Hide with ESC):** Ekranda yer kaplamasını istemediğinizde ESC tuşuna basarak uygulamayı anında gizleyebilirsiniz. / Instantly hide the app by pressing the ESC key whenever you need it out of sight.
 
+-------
+Seminay AI v.0.0.1 - Güncelleme Notları
 
+1. Bağlantı, hafıza ve Google arama sorununu çözdüğümü düşünüyorum. Bizzat 4,5 saat test ettim; uygulama açık olduğu sürece Google arama aktif, Gemini güncel bilgilere ulaşabilir, bağlantı tazelenir, kesinti hissedilmez ve hafıza yerindedir... (Not: Google yetki tokeni sınırlaması nedeniyle Gemini bazen arama gerektirecek soruda arayüzü "düşünüyor" modunda kilitleyecektir. Bu şekilde olunca tekrar seslenin ona; bu, bağlantıyı ve arama limitini tazeler ve kaldığınız yerden sohbete devam edebilirsiniz.)
+
+2. Veri gönderim metodu, Google'ın istediği güncel metoda çekildi.
+
+3. Bazı kod ve arayüz iyileştirme ve geliştirmeleri yapıldı. (Şeffaf arka plan, sürükleme ve gölge efekti vb...)
+
+---
+
+Seminay AI v.0.0.1 - Update Notes
+
+1. I believe I have resolved the connection, memory, and Google Search issues. I personally tested it for 4.5 hours; as long as the application remains open, Google Search is active, Gemini can access up-to-date information, the connection refreshes, there is no noticeable interruption, and the memory remains intact... (Note: Due to Google authorization token limitations, Gemini may occasionally lock the interface in "thinking" mode when a query requires a search. If this happens, simply speak to it again; this will refresh the connection and search limits, allowing you to continue the conversation from where you left off.)
+
+2. The data transmission method has been updated to the current method required by Google.
+
+3. Various code and interface improvements were made. (Transparent background, dragging, shadow effects, etc.)
+-------
 
 
 <p align="center">
