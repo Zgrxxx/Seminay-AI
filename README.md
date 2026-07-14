@@ -27,8 +27,6 @@ I tried to keep it as simple and user-friendly as possible. Just get a free API 
 
 If you wish, you can change it later by entering a different key in the settings.
 
-If you wish, you can change it later by entering a different key in the settings.
-
 You can start the conversation either by speaking into the microphone right away or by double-clicking the capsule to type your message in the text field that appears. Gemini will only respond via voice.
 
 As I mentioned, I tried to keep it quite minimal. Features like screen capture, camera, etc., have been removed. It is strictly for voice-based responses and chatting. (However, they might be added in the future if requested.)
