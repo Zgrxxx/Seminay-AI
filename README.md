@@ -53,7 +53,7 @@ Anyone is welcome to modify, improve, or take inspiration from this app for thei
 
 * ⚙️ **Gelişmiş Ayarlar Menüsü (Advanced Settings):** API anahtarı değişimi, yapay zekanın ses seçimi, dil seçimi ve yapay zekaya rol biçebileceğiniz sistem talimatı (System Instruction) alanını içerir. / Includes API key updates, AI voice selection, language selection, and a system instruction field to define the AI's persona.
 
-<img width="318" height="429" alt="Ayarlar" src="https://github.com/user-attachments/assets/59778fdf-72a3-45f4-97a4-ffbce5bca658" />
+<img width="308" height="512" alt="Ayarlar" src="https://github.com/user-attachments/assets/342d0087-fab0-46f6-943d-90492643ba94" />
 
 * ⌨️ **ESC ile Hızlı Gizleme (Quick Hide with ESC):** Ekranda yer kaplamasını istemediğinizde ESC tuşuna basarak uygulamayı anında gizleyebilirsiniz. / Instantly hide the app by pressing the ESC key whenever you need it out of sight.
 
@@ -89,12 +89,12 @@ Seminay AI v.0.0.1 - Update Notes
 
 
 <p align="center">
-  <a href="https://github.com/Zgrxxx/Seminay-AI/releases/latest">
-    <img src="https://img.shields.io/badge/Download-EXE_v1.0.1-green?style=for-the-badge&logo=windows" alt="Download EXE">
+  <a href="https://github.com/Zgrxxx/Seminay-AI/releases/tag/V1.0.2">
+    <img src="https://img.shields.io/badge/Download-EXE_v1.0.2-green?style=for-the-badge&logo=windows" alt="Download EXE">
   </a>
 </p>
 
 <p align="center">
   🔗 <b>Alternatif İndirme Linki / Alternative Download Link (Google Drive):</b> 
-  <a href="https://drive.google.com/file/d/1WRsK63WEertSNW-vGsvQnr6oPDecAfGB/view?usp=sharing">İndir / Download</a>
+  <a href="https://drive.google.com/file/d/15fUIK68nhgXn11wQX0LzQL28QRu7jt2H/view?usp=sharing">İndir / Download</a>
 </p>
