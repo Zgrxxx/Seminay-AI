@@ -7,6 +7,7 @@ import time
 import pyaudio
 import struct 
 
+from pynput import keyboard
 from google import genai
 from google.genai import types
 
@@ -17,6 +18,15 @@ from PyQt6.QtCore import Qt, QTimer, QThread, pyqtSignal, pyqtSlot, QSettings, Q
 from PyQt6.QtGui import QPainter, QColor, QIcon
 from PyQt6.QtCore import QProcess
 
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 SEND_SAMPLE_RATE = 16000
@@ -25,8 +35,9 @@ CHUNK_SIZE = 1024
 
 MODEL = "models/gemini-2.5-flash-native-audio-latest"
 
+
 class GeminiWorker(QThread):
-    state_changed = pyqtSignal(str)  # SPEAKING, THINKING, IDLE
+    state_changed = pyqtSignal(str)
 
     def __init__(self):
         super().__init__()
@@ -78,10 +89,7 @@ class GeminiWorker(QThread):
                     trigger_tokens=104857,   
                     sliding_window=types.SlidingWindow(target_tokens=52428),
                 ),
-
                 session_resumption=types.SessionResumptionConfig(handle=self.current_handle),
-                
-
                 tools=[
                     types.Tool(google_search=types.GoogleSearch())
                 ]
@@ -90,6 +98,8 @@ class GeminiWorker(QThread):
             try:
                 async with client.aio.live.connect(model=MODEL, config=config) as session:
                     self.session = session
+                    self.current_state = "IDLE"
+                    self.state_changed.emit("IDLE")
                     self.audio_in_queue = asyncio.Queue()
                     self.out_queue = asyncio.Queue(maxsize=50)
 
@@ -101,12 +111,11 @@ class GeminiWorker(QThread):
 
                         while self.running:
                             await asyncio.sleep(0.5)
-
                             if self.receive_task.done():
-
-                                raise ConnectionError("Tünel süresi doldu, zombi görevler iptal edilip jetonla tazeleniyor...")
+                                raise ConnectionError("")
             except Exception:
-
+                self.current_state = "DISCONNECTED"
+                self.state_changed.emit("DISCONNECTED")
                 await asyncio.sleep(0.5)
 
     async def send_realtime(self):
@@ -125,10 +134,16 @@ class GeminiWorker(QThread):
 
     async def listen_audio(self):
         def open_mic_stream():
-            mic_info = self.pya_in.get_default_input_device_info()
+            settings = QSettings("SeminayAI", "SeminayAsistan")
+            saved_mic = settings.value("selected_mic", None)
+            try:
+                mic_idx = int(saved_mic) if saved_mic is not None else self.pya_in.get_default_input_device_info()["index"]
+            except Exception:
+                mic_idx = self.pya_in.get_default_input_device_info()["index"]
+                
             return self.pya_in.open(
                 format=FORMAT, channels=CHANNELS, rate=SEND_SAMPLE_RATE,
-                input=True, input_device_index=mic_info["index"], frames_per_buffer=CHUNK_SIZE
+                input=True, input_device_index=mic_idx, frames_per_buffer=CHUNK_SIZE
             )
 
         stream = await asyncio.to_thread(open_mic_stream)
@@ -140,7 +155,7 @@ class GeminiWorker(QThread):
                 
                 data = await asyncio.to_thread(stream.read, CHUNK_SIZE, exception_on_overflow=False)
                 
-                if self.current_state == "SPEAKING":
+                if self.current_state == "SPEAKING" or self.current_state == "DISCONNECTED":
                     continue
                 
                 if self.current_state != "SPEAKING" and not self.mic_muted:
@@ -163,7 +178,6 @@ class GeminiWorker(QThread):
             if self.session:
                 try:
                     async for response in self.session.receive():
-
                         if response.session_resumption_update:
                             update = response.session_resumption_update
                             if update.resumable and update.new_handle:
@@ -183,9 +197,21 @@ class GeminiWorker(QThread):
             await asyncio.sleep(0.1)
 
     async def play_audio(self):
-        stream = await asyncio.to_thread(
-            self.pya_out.open, format=FORMAT, channels=CHANNELS, rate=RECEIVE_SAMPLE_RATE, output=True
-        )
+        def open_speaker_stream():
+            settings = QSettings("SeminayAI", "SeminayAsistan")
+            saved_speaker = settings.value("selected_speaker", None)
+            try:
+                speaker_idx = int(saved_speaker) if saved_speaker is not None else self.pya_out.get_default_output_device_info()["index"]
+            except Exception:
+                speaker_idx = self.pya_out.get_default_output_device_info()["index"]
+                
+            return self.pya_out.open(
+                format=FORMAT, channels=CHANNELS, rate=RECEIVE_SAMPLE_RATE, 
+                output=True, output_device_index=speaker_idx
+            )
+            
+        stream = await asyncio.to_thread(open_speaker_stream)
+
         try:
             while self.running:
                 bytestream = await self.audio_in_queue.get()
@@ -239,7 +265,9 @@ class EqualizerBar(QWidget):
         self.update()
 
     def update_animation(self):
-        if self.state == "THINKING":
+        if self.state == "DISCONNECTED":
+            self.values = [10, 10, 10]
+        elif self.state == "THINKING":
             self.values = [10, 10, 10]
             self.values[self.wave_counter % 3] = 18
             self.wave_counter += 1
@@ -255,7 +283,9 @@ class EqualizerBar(QWidget):
     def paintEvent(self, event):
         p = QPainter(self)
         p.setRenderHint(QPainter.RenderHint.Antialiasing)
-        p.setBrush(self.bar_color)
+        
+        nokta_rengi = QColor("#ff0000") if self.state == "DISCONNECTED" else self.bar_color
+        p.setBrush(nokta_rengi)
         p.setPen(Qt.PenStyle.NoPen)
         
         if self.state == "LISTENING":
@@ -273,7 +303,6 @@ class EqualizerBar(QWidget):
         base_color = QColor("#ff0000") if is_muted else QColor("#00ff00")
         
         p.setPen(Qt.PenStyle.NoPen)
-        
         p.setBrush(QColor(0, 0, 0, 150))
         p.drawEllipse(54, 0, 7, 7) 
         
@@ -291,8 +320,8 @@ class EqualizerBar(QWidget):
                 self.update()
                 event.accept() 
                 return
-
         event.ignore()
+
 
 class SettingsWindow(QWidget):
     def __init__(self, full_mode=False):
@@ -327,19 +356,21 @@ class SettingsWindow(QWidget):
         texts = {
             "TR": {
                 "title_setup": "Seminay Kurulum", "title_settings": "Seminay Ayarlar",
-                "api_lbl": "Gemini API Key:", "lang_lbl": "Uygulama Dili / Language:",
+                "api_lbl": "Gemini API Key:", "lang_lbl": "Uygulama Dili:",
                 "voice_lbl": "Ses Tonu Seçimi:", "prompt_lbl": "Kişilik Talimatı (Prompt):", 
                 "default_voice": "Varsayılan (Gemini Standart)",
                 "save_start": "Kaydet ve Başlat", "save_restart": "Kaydet ve Yeniden Başlat", "cancel": "İptal",
-                "exit": "Çıkış"
+                "exit": "Çıkış",
+                "mic_lbl": "Mikrofon:", "speaker_lbl": "Hoparlör:"
             },
             "EN": {
                 "title_setup": "Seminay Setup", "title_settings": "Seminay Settings",
-                "api_lbl": "Gemini API Key:", "lang_lbl": "Language / Uygulama Dili:",
+                "api_lbl": "Gemini API Key:", "lang_lbl": "Language:",
                 "voice_lbl": "Voice Selection:", "prompt_lbl": "System Instructions (Prompt):", 
                 "default_voice": "Default (Gemini Standard)",
                 "save_start": "Save and Start", "save_restart": "Save and Restart", "cancel": "Cancel",
-                "exit": "Exit"
+                "exit": "Exit",
+                "mic_lbl": "Microphone:", "speaker_lbl": "Speaker:"
             }
         }
         t = texts.get(self.current_lang, texts["TR"])
@@ -349,12 +380,29 @@ class SettingsWindow(QWidget):
         title.setStyleSheet("font-size: 14px; font-weight: bold; border: none; background: transparent;")
         layout.addWidget(title)
 
-        layout.addWidget(QLabel(t["lang_lbl"], styleSheet="color: #aaaaaa; font-size: 11px; border: none; background: transparent;"))
+        top_layout = QHBoxLayout()
+
         self.lang_combo = QComboBox()
-        self.lang_combo.addItem("Türkçe 🇹🇷", "TR")
-        self.lang_combo.addItem("English 🇺🇸", "EN")
+        self.lang_combo.setFixedWidth(70)
+        self.lang_combo.addItem("TR", "TR")
+        self.lang_combo.addItem("EN", "EN")
         self.lang_combo.setCurrentIndex(0 if self.current_lang == "TR" else 1)
-        layout.addWidget(self.lang_combo)
+        top_layout.addWidget(self.lang_combo)
+
+        ptt_placeholder = "Bas-Konuş Tuşu Atayın" if self.current_lang == "TR" else "Assign PTT Key"
+        
+        self.ptt_input = QLineEdit()
+        self.ptt_input.setReadOnly(True)
+        self.ptt_input.setPlaceholderText(ptt_placeholder)
+        
+        saved_key = self.settings.value("ptt_key", "")
+        if saved_key:
+            self.ptt_input.setText(saved_key)
+        
+        self.ptt_input.mousePressEvent = self.capture_key
+        top_layout.addWidget(self.ptt_input)
+        
+        layout.addLayout(top_layout)
 
         layout.addWidget(QLabel(t["api_lbl"], styleSheet="color: #aaaaaa; font-size: 11px; border: none; background: transparent;"))
         self.api_input = QLineEdit()
@@ -363,14 +411,55 @@ class SettingsWindow(QWidget):
         layout.addWidget(self.api_input)
 
         if self.full_mode:
-            self.setFixedSize(290, 420) 
+            self.setFixedSize(290, 490) 
+            
+            device_layout = QHBoxLayout()
+            
+            mic_vbox = QVBoxLayout()
+            mic_label = QLabel(t["mic_lbl"])
+            mic_label.setStyleSheet("color: #aaaaaa; font-size: 11px; border: none; background: transparent;")
+            self.mic_combo = QComboBox()
+            mic_vbox.addWidget(mic_label)
+            mic_vbox.addWidget(self.mic_combo)
+            device_layout.addLayout(mic_vbox)
+            
+            speaker_vbox = QVBoxLayout()
+            speaker_label = QLabel(t["speaker_lbl"])
+            speaker_label.setStyleSheet("color: #aaaaaa; font-size: 11px; border: none; background: transparent;")
+            self.speaker_combo = QComboBox()
+            speaker_vbox.addWidget(speaker_label)
+            speaker_vbox.addWidget(self.speaker_combo)
+            device_layout.addLayout(speaker_vbox)
+            
+            layout.addLayout(device_layout)
+            
+            p = pyaudio.PyAudio()
+            saved_mic = self.settings.value("selected_mic", "")
+            saved_speaker = self.settings.value("selected_speaker", "")
+            
+            for i in range(p.get_device_count()):
+                try:
+                    dev = p.get_device_info_by_index(i)
+                    name = dev.get('name', f"Device {i}").encode('utf-8', 'ignore').decode('utf-8')
+                    
+                    if dev.get('maxInputChannels', 0) > 0:
+                        self.mic_combo.addItem(name, dev.get('index'))
+                        if str(dev.get('index')) == str(saved_mic):
+                            self.mic_combo.setCurrentIndex(self.mic_combo.count() - 1)
+                            
+                    if dev.get('maxOutputChannels', 0) > 0:
+                        self.speaker_combo.addItem(name, dev.get('index'))
+                        if str(dev.get('index')) == str(saved_speaker):
+                            self.speaker_combo.setCurrentIndex(self.speaker_combo.count() - 1)
+                except Exception:
+                    continue
+            p.terminate()
             
             layout.addWidget(QLabel(t["voice_lbl"], styleSheet="color: #aaaaaa; font-size: 11px; border: none; background: transparent;"))
             self.voice_combo = QComboBox()
             self.voice_combo.addItem(t["default_voice"], "")
             
             is_tr = (self.current_lang == "TR")
-
 
             self.voice_combo.addItem("--- Kadın Sesleri ---" if is_tr else "--- Female Voices ---", None)
             female_voices = [
@@ -461,13 +550,14 @@ class SettingsWindow(QWidget):
         self.move(s.width() - self.width() - 15, s.height() - self.height() - 45)
 
     def save_settings(self):
-
         self.settings.setValue("language", self.lang_combo.currentData())
         self.settings.setValue("api_key", self.api_input.text().strip())
         
         if self.full_mode:
             self.settings.setValue("voice", self.voice_combo.currentData())
             self.settings.setValue("system_instruction", self.instruction_input.toPlainText().strip())
+            self.settings.setValue("selected_mic", self.mic_combo.currentData())
+            self.settings.setValue("selected_speaker", self.speaker_combo.currentData())
         else:
             self.settings.setValue("voice", "")
             self.settings.setValue("system_instruction", "")
@@ -504,6 +594,17 @@ class SettingsWindow(QWidget):
         msg.exec()
         QApplication.quit()
 
+    def capture_key(self, event):
+        self.ptt_input.setText("...")
+        self.key_listener = keyboard.Listener(on_press=lambda k: self.update_key(k))
+        self.key_listener.start()
+
+    def update_key(self, key):
+        key_name = str(key).replace("'", "").replace("Key.", "")
+        self.ptt_input.setText(key_name)
+        self.settings.setValue("ptt_key", key_name)
+        self.key_listener.stop()
+
     def close_settings(self):
         self.close()
         for widget in QApplication.topLevelWidgets():
@@ -512,6 +613,8 @@ class SettingsWindow(QWidget):
 
 
 class SeminayKapsul(QWidget):
+    shortcut_triggered = pyqtSignal()
+
     def __init__(self):
         super().__init__()
         self.settings = QSettings("SeminayAI", "SeminayAsistan")
@@ -576,7 +679,23 @@ class SeminayKapsul(QWidget):
         
         from PyQt6.QtCore import QEasingCurve
         self.opacity_anim.setEasingCurve(QEasingCurve.Type.InOutQuad)
+
+        self.listener = keyboard.GlobalHotKeys({
+            '<ctrl>+<f9>': self.shortcut_triggered.emit,
+        })
+        self.listener.start()
         
+        self.shortcut_triggered.connect(self.show_kapsul)
+
+        self.ptt_key = self.settings.value("ptt_key", "")
+        self.is_ptt_held = False 
+        
+        self.ptt_listener = keyboard.Listener(
+            on_press=self.on_ptt_press, 
+            on_release=self.on_ptt_release
+        )
+        self.ptt_listener.start()
+
         self.show()
         self.opacity_anim.start()
 
@@ -591,7 +710,7 @@ class SeminayKapsul(QWidget):
 
         self.tray_icon = QSystemTrayIcon(self)
         
-        icon_path = os.path.join(os.getcwd(), "icon.ico")
+        icon_path = resource_path("icon.ico")
         if os.path.exists(icon_path):
             self.tray_icon.setIcon(QIcon(icon_path))
         else:
@@ -629,7 +748,10 @@ class SeminayKapsul(QWidget):
         self.hide()
         if hasattr(self, 'tray_icon'):
             self.tray_icon.hide()
-        
+
+        if hasattr(self, 'listener'):
+            self.listener.stop()
+
         self.worker.running = False
         QTimer.singleShot(500, self._final_terminate)
 
@@ -644,6 +766,7 @@ class SeminayKapsul(QWidget):
     def show_kapsul(self):
         self.show()
         self.raise_()
+        self.activateWindow()
 
     def reposition_to_corner(self):
         s = QApplication.primaryScreen().availableGeometry()
@@ -706,6 +829,30 @@ class SeminayKapsul(QWidget):
         if muted:
             self.on_state_changed("IDLE")
         self.equalizer.update()
+
+    def on_ptt_press(self, key):
+        key_name = key.name if hasattr(key, 'name') else key.char
+        current_ptt = self.settings.value("ptt_key", "")
+        
+        if current_ptt and key_name == current_ptt:
+            if self.worker.mic_muted:
+                self.is_ptt_held = True 
+                self.worker.mic_muted = False
+                self.equalizer.update()
+
+    def on_ptt_release(self, key): 
+        key_name = key.name if hasattr(key, 'name') else key.char 
+        current_ptt = self.settings.value("ptt_key", "") 
+        
+        if current_ptt and key_name == current_ptt: 
+            if self.is_ptt_held: 
+                self.is_ptt_held = False 
+                QTimer.singleShot(1000, self.delayed_ptt_mute)
+
+    def delayed_ptt_mute(self):
+        if not self.is_ptt_held:
+            self.worker.mic_muted = True
+            self.equalizer.update()
 
     def closeEvent(self, event):
         self.safe_exit()
